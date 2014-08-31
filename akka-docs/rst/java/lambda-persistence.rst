@@ -398,6 +398,21 @@ have not been confirmed within a configurable timeout.
 Use the ``deliver`` method to send a message to a destination. Call the ``confirmDelivery`` method
 when the destination has replied with a confirmation message.
 
+deliver and confirmDelivery
+---------------------------
+
+To send messages to the destination path, use the ``Deliver`` method. If the persistent actor is not currently recovering, 
+this will send the message to the destination actor. Deliver also requires a function that can specify the delivery id for the message. 
+
+A ``deliveryId`` is required for use in playback, when the actor is recovering, so that messages received can be correctly acknowledged. 
+Persistence provides a default sequence number implementation which can be used as the ``deliveryId``  for messages, 
+but it is also entirely possible to define a custom function to generate ``deliveryId`` ’s, 
+provided that the sequence increases monotonically without gaps.
+
+When recovering, messages will be buffered until they have been confirmed using ``confirmDelivery``. 
+Once recovery has completed, if there are outstanding messages that have not been confirmed (during the message replay), 
+the persistent actor will resend these before sending any other messages.
+
 .. includecode:: ../../../akka-samples/akka-sample-persistence-java-lambda/src/main/java/doc/LambdaPersistenceDocTest.java#at-least-once-example
 
 Correlation between ``deliver`` and ``confirmDelivery`` is performed with the ``deliveryId`` that is provided
